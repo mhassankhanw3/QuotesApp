@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "49148949866",
+    "project_id": "quotesapp-7b95e",
+    "storage_bucket": "quotesapp-7b95e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:49148949866:android:d0ba4dedfea5d5e37ae113",
+        "android_client_info": {
+          "package_name": "com.quotesapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWo4eFW0Ly_NeZQTfXhpcQpxkqBI0bHiU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
