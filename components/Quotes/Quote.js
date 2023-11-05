@@ -9,11 +9,31 @@ import {
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/Entypo';
 import IconShare from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Clipboard from '@react-native-clipboard/clipboard';
 import {useMainContext} from '../../context/Main';
+import Snackbar from 'react-native-snackbar';
+// import {Clipboard} from '@react-native-clipboard/clipboard';
+
 const transparent = 'rgba(0,0,0,0.5)';
 export default function Quote({data, shareQuote}) {
   const [likedQuotes, setLikedQuotes] = useState(data.map(() => false));
   const {isEnabled} = useMainContext();
+  const [copiedText, setCopiedText] = useState('');
+
+  const copyToClipboard = async quote => {
+    try {
+      await Clipboard.setString(quote);
+      // Optionally, provide user feedback that the quote has been copied.
+      // For example, you can use the react-native-snackbar library.
+      Snackbar.show({
+        text: 'Quote Copied!',
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+    }
+  };
 
   const funcLike = index => {
     const updatedLikes = [...likedQuotes];
@@ -91,6 +111,17 @@ export default function Quote({data, shareQuote}) {
               underlayColor={'#e5e7eb'}
               className={'bg-transparent flex items-center justify-center p-1'}>
               <IconShare name={'share-social'} size={26} color={'#3b82f6'} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => copyToClipboard(item?.quote)}
+              activeOpacity={0.4}
+              underlayColor={'#e5e7eb'}
+              className={'bg-transparent flex items-center justify-center p-1'}>
+              <MaterialIcons
+                name={'content-copy'}
+                size={24}
+                color={'#6b7280'}
+              />
             </TouchableOpacity>
           </View>
         </View>

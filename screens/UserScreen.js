@@ -29,8 +29,11 @@ import Followers from '../components/User/UserFollow';
 import Loading from '../components/loadings/loading';
 import {useNavigation, useIsFocused} from '@react-navigation/native';
 import {Share} from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import NativeModal from '../components/Modal/Modal';
 import DeleteModal from '../components/Modal/DeleteModal';
+import Clipboard from '@react-native-clipboard/clipboard';
+import Snackbar from 'react-native-snackbar';
 
 const transparent = 'rgba(0,0,0,0.5)';
 export default function UserScreen() {
@@ -40,14 +43,23 @@ export default function UserScreen() {
   const [likedQuotes, setLikedQuotes] = useState(userQuotes.map(() => false));
   const [deleteQuote, setDeleteQuote] = useState(null);
   const [quoteToDelete, setQuoteToDelete] = useState(null);
-
   const [selectedQuoteIndex, setSelectedQuoteIndex] = useState(null);
-
+  const [copiedText, setCopiedText] = useState('');
   const {user, func, isEnabled, toggleSwitch, loading, setLoading} =
     useMainContext();
 
   const isFocused = useIsFocused();
   const navigation = useNavigation();
+
+  const copyToClipboard = async quote => {
+    try {
+      await Clipboard.setString(quote);
+      // Optionally, provide user feedback that the quote has been copied.
+      // For example, you can use the react-native-snackbar library.
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+    }
+  };
 
   const funcLike = index => {
     const updatedLikes = [...likedQuotes];
@@ -78,22 +90,14 @@ export default function UserScreen() {
 
   //                       handleDeleteQuote
 
-  const handleDeleteQuote = async quoteId => {
-    if (quoteId) {
-      try {
-        // Attempt to delete the quote in Firestore
-        await func.deleteQuoteFromFirestore(quoteId);
-        // If successful, update the local state
-        const updatedUserQuotes = userQuotes.filter(
-          quote => quote.id !== quoteId,
-        );
-        setUserQuotes(updatedUserQuotes);
-        setQuoteToDelete(null);
-        setSelectedQuoteIndex(null);
-      } catch (error) {
-        console.error('Error deleting quote:', error);
-        // Handle the error, such as displaying an error message to the user
-      }
+  const handleCopyQuote = quote => {
+    try {
+      Clipboard.setString(quote);
+      setModalVisible(false); // Close the modal
+      setCopiedText(quote); // Set the copied text in state
+      console.log('Copied Quote:', quote);
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
     }
   };
 
@@ -321,7 +325,7 @@ export default function UserScreen() {
                               </Text>
                               <Text
                                 style={styles.italic}
-                                className={`text-[16px] mr-10 ${
+                                className={`text-[16px] pr-6 ${
                                   isEnabled ? 'text-gray-400' : 'text-gray-500'
                                 } `}>
                                 &ldquo;{item.quote}&rdquo;
@@ -346,18 +350,6 @@ export default function UserScreen() {
                                 color="rgb(255, 48, 64)"
                               />
                             </TouchableOpacity>
-                            {/* <TouchableOpacity
-                                activeOpacity={0.4}
-                                underlayColor={'#e5e7eb'}
-                                className={
-                                  'bg-transparent flex items-center justify-center p-1'
-                                }>
-                                <IconShare
-                                  name={'share-social'}
-                                  size={26}
-                                  color={'#3b82f6'}
-                                />
-                              </TouchableOpacity> */}
                             <TouchableOpacity
                               onPress={() =>
                                 shareQuote(
@@ -393,14 +385,35 @@ export default function UserScreen() {
                                 className={`max-w-full w-[70%] mx-auto ${
                                   isEnabled ? 'bg-zinc-800' : 'bg-white'
                                 } pt-4 pb-2 px-4 rounded-xl shadow-2xl shadow-gray-800 backdrop-blur-xl`}>
-                                <Text
-                                  className={`${
-                                    isEnabled
-                                      ? 'text-gray-300'
-                                      : 'text-gray-600'
-                                  } text-[17px] font-medium`}>
-                                  Delete Quote?
-                                </Text>
+                                <View className="flex flex-row items-center justify-between">
+                                  <Text
+                                    className={`${
+                                      isEnabled
+                                        ? 'text-gray-300'
+                                        : 'text-gray-600'
+                                    } text-[17px] font-medium`}>
+                                    Delete Quote?
+                                  </Text>
+                                  <TouchableOpacity
+                                    onPress={() => {
+                                      handleCopyQuote(item?.quote); // Copy the quote
+                                      Snackbar.show({
+                                        text: 'Quote Copied!',
+                                        duration: Snackbar.LENGTH_SHORT,
+                                      });
+                                    }}
+                                    activeOpacity={0.4}
+                                    underlayColor={'#e5e7eb'}
+                                    className={
+                                      'bg-transparent flex items-center justify-center p-1'
+                                    }>
+                                    <MaterialIcons
+                                      name={'content-copy'}
+                                      size={22}
+                                      color={'#22c55e'}
+                                    />
+                                  </TouchableOpacity>
+                                </View>
                                 <View className="p-0 w-20 h-20 flex items-center justify-center mx-auto">
                                   <LottieView
                                     style={{
